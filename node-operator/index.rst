@@ -20,4 +20,5 @@ It is recommended that you have prior knowledge of Unix-based operating systems 
    setup
    bonding
    unbonding
+   rejoining
    
