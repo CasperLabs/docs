@@ -68,7 +68,7 @@ CSPR Token
 
 What is CSPR, and its role in the Casper network?
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-CSPR is the native token to the Casper network. As a Proof of Stake blockchain, Casper relies on CSPR to reward the validators that participate in the PoS consensus mechanism to secure and uphold the network. Casper users also rely on CSPR to pay network fees for on-chain actions.
+CSPR is the native token to the Casper network. As a Proof-of-Stake blockchain, Casper relies on CSPR to reward the validators that participate in the PoS consensus mechanism to secure and uphold the network. Casper users also rely on CSPR to pay network fees for on-chain actions. For example, each token transfer costs 0.0001 CSPR (10000 motes) and the amount transferred needs to be 2.5 CSPR or more. 
 
 Where can I find information about CSPR, the supply, the allocation, and the sale?
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

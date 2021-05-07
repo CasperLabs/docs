@@ -11,7 +11,7 @@ There are a few pre-requisites to doing this:
 
 * A Client that communicates with the network
 * The private key for the account that pays for the deployment
-* Token to pay for the deployment on the network in the account associated with the private key..
+* Token to pay for the deployment on the network in the account associated with the private key. Each token transfer costs exactly 0.0001 CSPR (10000 motes). Also, the amount transferred needs to be a minimum of 2.5 CSPR.
 
 This section will help you get set up with each pre-requisite.
 

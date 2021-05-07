@@ -12,6 +12,8 @@ To follow the steps in this document, you will need:
 1. A compatible client or SDK such as the `JavaScript SDK <https://www.npmjs.com/package/casper-client-sdk>`_, `Java SDK <https://github.com/cnorburn/casper-java-sdk>`_, or GoLang SDK (location forthcoming)
 2. The public key (hex) of 2 accounts (one source account, one target account)
 3. A node RPC endpoint to send the transaction
+4. The transfer amount needs to be 2.5 CSPR or more
+5. The transfer will cost 0.0001 CSPR (10000 motes)  
 
 The Rust Casper Client
 ^^^^^^^^^^^^^^^^^^^^^^
@@ -106,31 +108,36 @@ Clients can communicate with nodes on the network via JSON-RPC requests sent to 
 
 The ``transfer`` command below demonstrates how to transfer from a source account to a target account using the Rust client by sending a request to the selected node's RPC endpoint.
 
-You can use the optional ``transfer-id`` field in the request to tag the transaction and to correlate it to your back-end storage. For example, you might store transactions in a database in a Transaction table. The primary key of this table could be a TransactionID. You can set the ``transfer-id`` in the transfer request below to be the TransactionID from your database table. This way you can use the optional ``transfer-id`` field to identify and track transactions in your platform.
+**Transfer Requirements**:
 
-**Note**: ``transfer-id`` is a ``u64`` field and can be set using the optional ``--transfer-id`` flag in the example command below.
+1. Each transfer amount needs to be 2.5 CSPR or more
+2. Each transfer costs 0.0001 CSPR (10000 motes). The transfer cost is fixed, and a different ``payment-amount`` will be ignored
+
+When sending a transfer, **use the required ``transfer-id`` field in the request to identify and track transactions** in your platform. For example, you might store transactions in a database in a Transaction table. The primary key of this table could be a TransactionID. You can set the ``transfer-id`` in the transfer request below to be the TransactionID from your database table. This way, you can use the ``transfer-id`` field to tag the transaction and correlate it to your back-end storage.
+
+**Note**: ``transfer-id`` is a ``u64`` field and can be set using the required ``--transfer-id`` flag in the example command below.
 
 **Important request fields:**
 
 - ``id`` - <STRING OR INTEGER> Optional JSON-RPC identifier applied to the request and returned in the response. If not provided, a random integer will be assigned
+- ``transfer-id`` - <64-BIT INTEGER> Required user-defined transfer id
 - ``node-address`` - <HOST:PORT> Hostname or IP and port of node on which HTTP service is running [default:http://localhost:7777]
 - ``amount`` - <512-BIT INTEGER> The number of motes to transfer
 - ``secret-key`` - Path to secret key file
 - ``chain-name`` - Name of the chain, to avoid the deploy from being accidentally or maliciously included in a different chain
   - The *chain-name* for testnet is **casper-test**
   - The *chain-name* for mainnet is **casper**
-- ``payment-amount`` - If provided, uses the standard-payment system contract rather than custom payment Wasm. Token transfers of CSPR cost exactly 10000 gas
-- ``target-account`` - <HEX STRING> Hex-encoded public key of the account from which the main purse will be used as the target.
+- ``target-account`` - <HEX STRING> Hex-encoded public key of the account from which the main purse will be used as the target
 
 ::
 
     casper-client transfer \
-        --id 1234511111 \
+        --id 1 \
+        --transfer-id 123456789012345 \
         --node-address http://<peer-ip-address>:7777 \
         --amount <amount-to-transfer> \
         --secret-key <source-account-secret-key>.pem \
         --chain-name casper \
-        --payment-amount 10000 \
         --target-account <hex-encoded-target-account-public-key>
 
 **Important response fields:**
@@ -149,7 +156,7 @@ You can use the optional ``transfer-id`` field in the request to tag the transac
 .. code-block:: json
 
     {
-      "id": 1234511111,
+      "id": 1,
       "jsonrpc": "2.0",
       "method": "account_put_deploy",
       "params": {
@@ -228,7 +235,7 @@ You can use the optional ``transfer-id`` field in the request to tag the transac
 .. code-block:: json
 
     {
-      "id": 1234511111,
+      "id": 1,
       "jsonrpc": "2.0",
       "result": {
         "api_version": "1.0.0",
@@ -257,7 +264,7 @@ If the ``execution_results`` in the output are null, the transaction hasn't run 
 ::
 
     casper-client get-deploy \
-          --id 1234522222 \
+          --id 2 \
           --node-address http://<peer-ip-address>:7777 \
           <deploy-hash>
 
@@ -279,7 +286,7 @@ If the ``execution_results`` in the output are null, the transaction hasn't run 
 .. code-block:: json
 
     {
-    "id": 1234522222,
+    "id": 2,
     "jsonrpc": "2.0",
     "method": "info_get_deploy",
     "params": {
@@ -292,7 +299,7 @@ If the ``execution_results`` in the output are null, the transaction hasn't run 
 .. code-block:: json
 
     {
-      "id": 1234522222,
+      "id": 2,
       "jsonrpc": "2.0",
       "result": {
         "api_version": "1.0.0",
@@ -509,7 +516,7 @@ We will use the ``block_hash`` to query and retrieve the block that contains our
 ::
 
     casper-client get-block \
-          --id 1234533333 \
+          --id 3 \
           --node-address http://<peer-ip-address>:7777 \
           --block-identifier <block-hash> \
 
@@ -527,7 +534,7 @@ We will use the ``block_hash`` to query and retrieve the block that contains our
 .. code-block:: json
 
     {
-      "id": 1234533333,
+      "id": 3,
       "jsonrpc": "2.0",
       "method": "chain_get_block",
       "params": {
@@ -543,7 +550,7 @@ We will use the ``block_hash`` to query and retrieve the block that contains our
 .. code-block:: json
 
     {
-      "id": 1234533333,
+      "id": 3,
       "jsonrpc": "2.0",
       "result": {
         "api_version": "1.0.0",
@@ -616,7 +623,7 @@ Next, we will query for information about the ``Source`` account, using the glob
 ::
 
     casper-client query-state \
-      --id 12344444 \
+      --id 4 \
       --node-address http://<peer-ip-address>:7777 \
       --state-root-hash <state-root-hash> \
       --key <hex-encoded-source-account-public-key>
@@ -635,7 +642,7 @@ Next, we will query for information about the ``Source`` account, using the glob
 .. code-block:: json
 
     {
-      "id": 12344444,
+      "id": 4,
       "jsonrpc": "2.0",
       "method": "state_get_item",
       "params": {
@@ -650,7 +657,7 @@ Next, we will query for information about the ``Source`` account, using the glob
 .. code-block:: json
 
     {
-      "id": 12344444,
+      "id": 4,
       "jsonrpc": "2.0",
       "result": {
         "api_version": "1.0.0",
@@ -697,7 +704,7 @@ We will repeat the previous step to query information about the target account.
 ::
 
     casper-client query-state \
-          --id 123455555 \
+          --id 5 \
           --state-root-hash <state-root-hash> \
           --key <hex-encoded-target-account-public-key>
 
@@ -711,7 +718,7 @@ We will repeat the previous step to query information about the target account.
 .. code-block:: json
 
     {
-      "id": 123455555,
+      "id": 5,
       "jsonrpc": "2.0",
       "method": "state_get_item",
       "params": {
@@ -726,7 +733,7 @@ We will repeat the previous step to query information about the target account.
 .. code-block:: json
 
     {
-      "id": 123455555,
+      "id": 5,
       "jsonrpc": "2.0",
       "result": {
         "api_version": "1.0.0",
@@ -771,7 +778,7 @@ Now that we have the source purse address, we can get its balance using the ``ge
 ::
 
     casper-client get-balance \
-          --id 12346666 \
+          --id 6 \
           --node-address http://<peer-ip-address>:7777 \
           --state-root-hash <state-root-hash> \
           --purse-uref <source-account-purse-uref>
@@ -786,7 +793,7 @@ Now that we have the source purse address, we can get its balance using the ``ge
 .. code-block:: json
 
     {
-      "id": 12346666,
+      "id": 6,
       "jsonrpc": "2.0",
       "method": "state_get_balance",
       "params": {
@@ -800,7 +807,7 @@ Now that we have the source purse address, we can get its balance using the ``ge
 .. code-block:: json
 
     {
-      "id": 12346666,
+      "id": 6,
       "jsonrpc": "2.0",
       "result": {
         "api_version": "1.0.0",
@@ -829,7 +836,7 @@ Similarly, now that we have the address of the target purse, we can get its bala
 ::
 
     casper-client get-balance \
-          --id 12347777 \
+          --id 7 \
           --node-address http://<peer-ip-address>:7777 \
           --state-root-hash <state-root-hash> \
           --purse-uref <target-account-purse-uref>
@@ -844,7 +851,7 @@ Similarly, now that we have the address of the target purse, we can get its bala
 .. code-block:: json
 
     {
-      "id": 12347777,
+      "id": 7,
       "jsonrpc": "2.0",
       "method": "state_get_balance",
       "params": {
@@ -858,7 +865,7 @@ Similarly, now that we have the address of the target purse, we can get its bala
 .. code-block:: json
 
     {
-      "id": 12347777,
+      "id": 7,
       "jsonrpc": "2.0",
       "result": {
         "api_version": "1.0.0",
@@ -887,7 +894,7 @@ We will use the ``transfer-<address>`` to query more details about the transfer.
 ::
 
     casper-client query-state \
-          --id 12348888 \
+          --id 8 \
           --node-address http://<peer-ip-address>:7777 \
           --state-root-hash <state-root-hash> \
           --key transfer-<address>
@@ -902,7 +909,7 @@ We will use the ``transfer-<address>`` to query more details about the transfer.
 .. code-block:: json
 
     {
-      "id": 12348888,
+      "id": 8,
       "jsonrpc": "2.0",
       "method": "state_get_item",
       "params": {
@@ -917,7 +924,7 @@ We will use the ``transfer-<address>`` to query more details about the transfer.
 .. code-block:: json
 
     {
-      "id": 12348888,
+      "id": 8,
       "jsonrpc": "2.0",
       "result": {
         "api_version": "1.0.0",
